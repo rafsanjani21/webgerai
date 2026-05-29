@@ -1,3 +1,4 @@
+// lib/firebase.ts (atau firebase.js)
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
@@ -8,11 +9,14 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Mencegah inisialisasi ulang saat hot-reload di Next.js
+// Mencegah inisialisasi ulang jika app sudah berjalan (penting untuk Next.js)
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+// Inisialisasi Auth dan Provider Google
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-export { auth, googleProvider, signInWithPopup };
+export { app, auth, googleProvider, signInWithPopup };

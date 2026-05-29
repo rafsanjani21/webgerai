@@ -1,8 +1,8 @@
 import "./globals.css"; // Baris ini WAJIB ada agar desain terbaca
 
 export const metadata = {
-  title: "GERAI",
-  description: "Web Responsif GERAI",
+  title: "Koperasi GERAI",
+  description: "Web Responsif Koperasi GERAI",
 };
 
 export default function RootLayout({
