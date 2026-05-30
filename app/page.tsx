@@ -74,6 +74,69 @@ const NotificationModal = ({
   );
 };
 
+// ================= KOMPONEN MODAL KONFIRMASI =================
+const ConfirmationModal = ({
+  isOpen,
+  title,
+  message,
+  amount,
+  isLoading,
+  onConfirm,
+  onCancel
+}: {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  amount: number;
+  isLoading: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl w-full max-w-sm flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-6 sm:p-8 text-center flex flex-col items-center">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-yellow-100 text-yellow-600">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-black text-slate-800 tracking-tight mb-2">{title}</h3>
+          <p className="text-sm text-slate-500 font-medium leading-relaxed mb-4">{message}</p>
+          
+          <div className="bg-slate-50 w-full py-4 rounded-xl border border-slate-200 mb-8">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nominal Penarikan</p>
+            <p className="text-2xl font-black text-slate-800">{formatRupiah(amount)}</p>
+          </div>
+
+          <div className="flex w-full gap-3">
+            <button 
+              onClick={onCancel}
+              disabled={isLoading}
+              className="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3.5 rounded-xl font-bold tracking-wide transition-colors text-sm disabled:opacity-50"
+            >
+              BATAL
+            </button>
+            <button 
+              onClick={onConfirm} 
+              disabled={isLoading}
+              className="w-1/2 bg-blue-700 hover:bg-blue-800 text-white py-3.5 rounded-xl font-bold tracking-wide transition-colors text-sm flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                "YA, TARIK"
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ================= KOMPONEN NAVBAR =================
 const Navbar = ({ 
   nama, 
@@ -136,7 +199,10 @@ export default function Home() {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  
+  // State untuk proses withdraw
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const [notification, setNotification] = useState({ 
     isOpen: false, 
@@ -197,7 +263,8 @@ export default function Home() {
     });
   }, [router]);
 
-  const handleWithdraw = async () => {
+  // --- FUNGSI MUNCULKAN KONFIRMASI DULU ---
+  const handleRequestWithdraw = () => {
     if (user.saldoTersedia <= 0) {
       setNotification({
         isOpen: true,
@@ -207,11 +274,18 @@ export default function Home() {
       });
       return;
     }
+    // Buka modal konfirmasi jika saldo mencukupi
+    setIsConfirmModalOpen(true);
+  };
 
+  // --- FUNGSI EKSEKUSI API PENARIKAN ---
+  const handleConfirmWithdraw = async () => {
     setIsWithdrawing(true);
     try {
       const response = await fetchWithAuth("wallet/v1/withdraw", { method: "POST" });
       const resData = await response.json();
+
+      setIsConfirmModalOpen(false); // Tutup modal konfirmasi
 
       if (response.ok) {
         setNotification({
@@ -234,6 +308,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error withdraw:", error);
+      setIsConfirmModalOpen(false);
       setNotification({
         isOpen: true,
         title: "Koneksi Bermasalah",
@@ -301,12 +376,24 @@ export default function Home() {
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-yellow-200 selection:text-blue-900">
       <Navbar nama={user.nama} onLogout={handleLogout} isLoading={isLoggingOut} />
 
+      {/* --- MODAL NOTIFIKASI --- */}
       <NotificationModal 
         isOpen={notification.isOpen} 
         title={notification.title} 
         message={notification.message} 
         type={notification.type} 
         onClose={() => setNotification({ ...notification, isOpen: false })} 
+      />
+
+      {/* --- MODAL KONFIRMASI TARIK DANA --- */}
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        title="Konfirmasi Penarikan"
+        message="Apakah Anda yakin ingin menarik seluruh saldo aktif ke rekening Anda?"
+        amount={user.saldoTersedia}
+        isLoading={isWithdrawing}
+        onConfirm={handleConfirmWithdraw}
+        onCancel={() => setIsConfirmModalOpen(false)}
       />
 
       <div className="bg-linear-to-br from-blue-700 to-blue-950 px-4 sm:px-6 pt-12 pb-32">
@@ -365,7 +452,7 @@ export default function Home() {
               </div>
               
               <button 
-                onClick={handleWithdraw}
+                onClick={handleRequestWithdraw}
                 disabled={isWithdrawing || user.saldoTersedia <= 0}
                 className={`mt-8 w-full py-3.5 rounded-xl font-black text-sm transition-colors flex justify-center items-center gap-2 ${
                   isWithdrawing || user.saldoTersedia <= 0
