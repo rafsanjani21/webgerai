@@ -151,9 +151,23 @@ export default function Register() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    let newValue = value;
+
+    // Validasi khusus untuk input yang wajib angka saja
+    if (["nik", "phone_number", "referral_number"].includes(name)) {
+      newValue = newValue.replace(/\D/g, ""); // Hapus semua karakter non-angka
+    }
+
+    // Kunci panjang maksimal agar tidak bisa diketik lebih dari batas
+    if (name === "nik" && newValue.length > 16) newValue = newValue.slice(0, 16);
+    if ((name === "phone_number" || name === "referral_number") && newValue.length > 13) {
+      newValue = newValue.slice(0, 13);
+    }
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: newValue,
     });
   };
 
@@ -176,6 +190,20 @@ export default function Register() {
       !formData.address.trim()
     ) {
       setErrorData({ isOpen: true, message: "Mohon lengkapi semua kolom Data Diri sebelum melanjutkan." });
+      return;
+    }
+
+    // Validasi Digit Minimal
+    if (formData.nik.length < 16) {
+      setErrorData({ isOpen: true, message: "NIK KTP harus tepat 16 digit." });
+      return;
+    }
+    if (formData.phone_number.length < 11) {
+      setErrorData({ isOpen: true, message: "Nomor WhatsApp minimal 11 digit." });
+      return;
+    }
+    if (formData.referral_number.length > 0 && formData.referral_number.length < 11) {
+      setErrorData({ isOpen: true, message: "Nomor WhatsApp Referral minimal 11 digit jika Anda ingin mengisinya." });
       return;
     }
 
@@ -512,10 +540,22 @@ export default function Register() {
                     <div>
                       <label className={labelClass}>No. WhatsApp *</label>
                       <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleInputChange} placeholder="08xxxxxxxxxx" className={inputClass} required />
+                      {/* Peringatan Real-time No HP */}
+                      {formData.phone_number.length > 0 && formData.phone_number.length < 11 && (
+                        <p className="text-xs text-red-500 mt-1.5 font-semibold animate-in fade-in">
+                          Minimal 11 digit angka (Kurang {11 - formData.phone_number.length} digit)
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className={labelClass}>NIK KTP *</label>
                       <input type="text" name="nik" value={formData.nik} onChange={handleInputChange} placeholder="16 Digit NIK" className={inputClass} required />
+                      {/* Peringatan Real-time NIK */}
+                      {formData.nik.length > 0 && formData.nik.length < 16 && (
+                        <p className="text-xs text-red-500 mt-1.5 font-semibold animate-in fade-in">
+                          Harus 16 digit (Kurang {16 - formData.nik.length} digit)
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className={labelClass}>Jenis Keanggotaan *</label>
@@ -538,8 +578,14 @@ export default function Register() {
                       <textarea name="address" value={formData.address} onChange={handleInputChange} placeholder="Masukkan alamat lengkap..." className={inputClass} rows={3} required></textarea>
                     </div>
                     <div className="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                      <label className={labelClass}>No. WhatsApp Referral (Opsional)</label>
-                      <input type="tel" name="referral_number" value={formData.referral_number} onChange={handleInputChange} placeholder="Kosongkan jika tidak ada" className={`${inputClass} bg-white`} />
+                      <label className={labelClass}>No. WhatsApp Referral *</label>
+                      <input type="tel" name="referral_number" value={formData.referral_number} onChange={handleInputChange} placeholder="Masukkan No. WhatsApp Referral" className={`${inputClass} bg-white`} required />
+                      {/* Peringatan Real-time Referral */}
+                      {formData.referral_number.length > 0 && formData.referral_number.length < 11 && (
+                        <p className="text-xs text-red-500 mt-2 font-semibold animate-in fade-in">
+                          Minimal 11 digit angka (Kurang {11 - formData.referral_number.length} digit)
+                        </p>
+                      )}
                     </div>
                   </div>
 
