@@ -87,6 +87,7 @@ export default function Register() {
     bank_name: "",
     bank_account_number: "",
     referral_number: "",
+    bank_account_name: "",
   });
 
   const [agreeTerm, setAgreeTerm] = useState(false);
@@ -187,7 +188,8 @@ export default function Register() {
       !formData.member_type || 
       !formData.bank_name.trim() || 
       !formData.bank_account_number.trim() || 
-      !formData.address.trim()
+      !formData.address.trim() ||
+      !formData.bank_account_name.trim()
     ) {
       setErrorData({ isOpen: true, message: "Mohon lengkapi semua kolom Data Diri sebelum melanjutkan." });
       return;
@@ -244,6 +246,7 @@ export default function Register() {
       formDataPayload.append("address", formData.address);
       formDataPayload.append("bank_name", formData.bank_name);
       formDataPayload.append("bank_account_number", formData.bank_account_number);
+      formDataPayload.append("bank_account_name", formData.bank_account_name);
       
       if (formData.referral_number) {
         formDataPayload.append("referral_number", formData.referral_number);
@@ -572,6 +575,10 @@ export default function Register() {
                     <div>
                       <label className={labelClass}>Nomor Rekening *</label>
                       <input type="text" name="bank_account_number" value={formData.bank_account_number} onChange={handleInputChange} placeholder="Nomor rekening" className={inputClass} required />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Nama Pemilik Rekening *</label>
+                      <input type="text" name="bank_account_name" value={formData.bank_account_name} onChange={handleInputChange} placeholder="Nama pemilik rekening" className={inputClass} required />
                     </div>
                     <div className="md:col-span-2">
                       <label className={labelClass}>Alamat Lengkap (Sesuai KTP) *</label>

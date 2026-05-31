@@ -81,6 +81,7 @@ const ConfirmationModal = ({
   message,
   amount,
   bankName,
+  accountName,
   accountNumber,
   isLoading,
   onConfirm,
@@ -91,6 +92,7 @@ const ConfirmationModal = ({
   message: string;
   amount: number;
   bankName: string;
+  accountName: string;
   accountNumber: string;
   isLoading: boolean;
   onConfirm: () => void;
@@ -114,13 +116,15 @@ const ConfirmationModal = ({
           <div className="bg-slate-50 w-full p-5 rounded-2xl border border-slate-200 mb-8 space-y-4 text-center">
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nominal Penarikan</p>
-              <p className="text-2xl font-black text-slate-800">{formatRupiah(amount)}</p>
+              <p className="text-2xl font-black text-blue-800">{formatRupiah(amount)}</p>
             </div>
             
             <div className="border-t border-slate-200 pt-3">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Rekening Tujuan</p>
               <p className="text-sm font-black text-slate-700 tracking-tight uppercase">{bankName || "-"}</p>
-              <p className="text-xs font-mono font-bold text-slate-500 mt-0.5">{accountNumber || "-"}</p>
+              <p className="text-xs font-mono font-bold text-gray-500 mt-0.5">a.n</p>
+              <p className="text-xs font-mono font-bold text-black-500 mt-0.5">{accountName || "-"}</p>
+              <p className="text-xs font-mono font-bold text-blue-800 mt-0.5">{accountNumber || "-"}</p>
             </div>
           </div>
 
@@ -232,7 +236,8 @@ export default function Home() {
     totalDihasilkan: 0,
     iuranPokok: 1000000, 
     namaBank: "",        
-    noRekening: "",      
+    noRekening: "",
+    accountName: "",
     referredUsers: [] as any[],
     withdrawalHistory: [] as any[]
   });
@@ -252,22 +257,35 @@ export default function Home() {
     }
 
     try {
-      const response = await fetchWithAuth("user/v1/dashboard", { method: "GET" });
-      if (response.ok) {
-          const resData = await response.json();
-          const data = resData.data;
+      // Mengambil data dashboard dan info rekening secara paralel
+      const [dashResponse, bankResponse] = await Promise.all([
+        fetchWithAuth("user/v1/dashboard", { method: "GET" }),
+        fetchWithAuth("user/v1/bank-info", { method: "GET" })
+      ]);
+
+      if (dashResponse.ok) {
+          const dashResData = await dashResponse.json();
+          const dashData = dashResData.data;
+
+          // Ekstrak data bank jika fetch berhasil
+          let bankData = { bank_name: "", bank_account_number: "", bank_account_name: "" };
+          if (bankResponse.ok) {
+            const bankResJson = await bankResponse.json();
+            bankData = bankResJson.data || {};
+          }
 
           setUser({
-              nama: data.full_name || "Anggota",
-              jumlahReferral: data.total_referred_users || 0,
-              noWhatsapp: data.phone_number || "",
-              saldoTersedia: data.current_balance || 0,
-              totalDihasilkan: data.total_earned_reward || 0,
-              iuranPokok: 1000000, 
-              namaBank: data.bank_name || "",         
-              noRekening: data.account_number || "",   
-              referredUsers: data.referred_users_list || [],
-              withdrawalHistory: data.withdrawal_history_list || []
+              nama: dashData.full_name || "Anggota",
+              jumlahReferral: dashData.total_referred_users || 0,
+              noWhatsapp: dashData.phone_number || "",
+              saldoTersedia: dashData.current_balance || 0,
+              totalDihasilkan: dashData.total_earned_reward || 0,
+              iuranPokok: 1000000,
+              namaBank: bankData.bank_name || "",
+              noRekening: bankData.bank_account_number || "",
+              accountName: bankData.bank_account_name || "",
+              referredUsers: dashData.referred_users_list || [],
+              withdrawalHistory: dashData.withdrawal_history_list || []
           });
       }
     } catch (error) {
@@ -409,7 +427,8 @@ export default function Home() {
         message="Apakah Anda yakin ingin menarik seluruh saldo aktif ke rekening Anda?"
         amount={user.saldoTersedia}
         bankName={user.namaBank}        
-        accountNumber={user.noRekening} 
+        accountNumber={user.noRekening}
+        accountName={user.accountName}
         isLoading={isWithdrawing}
         onConfirm={handleConfirmWithdraw}
         onCancel={() => setIsConfirmModalOpen(false)}
@@ -446,7 +465,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* PERUBAHAN GRID: grid-cols-1 md:grid-cols-2 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 mb-10">
             
             {/* Box Undangan (Full Width di Desktop -> md:col-span-2) */}
@@ -470,15 +488,15 @@ export default function Home() {
             {/* Box Iuran Pokok */}
             <div className="bg-linear-to-br from-yellow-600 to-yellow-950 p-6 sm:p-8 rounded-2xl border border-yellow-800 flex flex-col justify-between">
               <div>
-                <p className="text-yellow-100 font-bold text-xs sm:text-sm tracking-widest uppercase mb-4">Iuran Pokok</p>
+                <p className="text-yellow-100 font-bold text-xs sm:text-sm tracking-widest uppercase mb-4">Saldo Iuran Pokok Anggota</p>
                 <p className="text-3xl sm:text-4xl font-black text-white truncate">
                   {formatRupiah(user.iuranPokok)}
                 </p>
               </div>
               
-              <div className="mt-8 w-full py-3.5 rounded-xl font-black text-sm flex justify-center items-center gap-2 bg-yellow-800/40 text-yellow-300 border border-yellow-700/50 cursor-default">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                Simpanan Terkunci
+              <div className="mt-8 w-full py-3.5 rounded-xl font-black text-sm flex justify-center items-center gap-2 bg-yellow-800/40 text-yellow-300 border border-yellow-700/50 cursor-default text-center">
+                <svg className="w-5 h-5 justify-center" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                Simpanan Pokok
               </div>
             </div>
 
