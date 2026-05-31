@@ -331,34 +331,49 @@ export default function Register() {
       
       if (!ctx) return;
 
-      canvas.width = video.clientWidth;
-      canvas.height = video.clientHeight;
+      // 1. Ambil rasio tampilan CSS untuk kebutuhan pemotongan (cropping)
+      const containerWidth = video.clientWidth;
+      const containerHeight = video.clientHeight;
+      const containerRatio = containerWidth / containerHeight;
 
-      const videoRatio = video.videoWidth / video.videoHeight;
-      const containerRatio = canvas.width / canvas.height;
+      // 2. Gunakan resolusi ASLI kamera agar hasil jepretan HD / Tidak Buram
+      const nativeWidth = video.videoWidth;
+      const nativeHeight = video.videoHeight;
+      const videoRatio = nativeWidth / nativeHeight;
 
-      let drawWidth, drawHeight, startX, startY;
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = nativeWidth;
+      let sourceHeight = nativeHeight;
 
+      // 3. Logika pemotongan (Cropping) pada resolusi asli
       if (videoRatio > containerRatio) {
-        drawHeight = canvas.height;
-        drawWidth = video.videoWidth * (canvas.height / video.videoHeight);
-        startX = (canvas.width - drawWidth) / 2;
-        startY = 0;
+        sourceWidth = nativeHeight * containerRatio;
+        sourceX = (nativeWidth - sourceWidth) / 2;
       } else {
-        drawWidth = canvas.width;
-        drawHeight = video.videoHeight * (canvas.width / video.videoWidth);
-        startX = 0;
-        startY = (canvas.height - drawHeight) / 2;
+        sourceHeight = nativeWidth / containerRatio;
+        sourceY = (nativeHeight - sourceHeight) / 2;
       }
 
+      // 4. Set ukuran kanvas ke resolusi potongan HD
+      canvas.width = sourceWidth;
+      canvas.height = sourceHeight;
+
+      // 5. Efek cermin khusus selfie
       if (activeCamera === "selfie") {
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
       }
 
-      ctx.drawImage(video, startX, startY, drawWidth, drawHeight);
+      // 6. Gambar ke kanvas dengan ukuran penuh
+      ctx.drawImage(
+        video, 
+        sourceX, sourceY, sourceWidth, sourceHeight, // Area asli video yang diambil
+        0, 0, canvas.width, canvas.height            // Area kanvas tempat menggambar
+      );
       
-      const imageUrl = canvas.toDataURL("image/jpeg", 0.85);
+      // 7. Simpan dengan kualitas 90% untuk keseimbangan HD & ukuran file
+      const imageUrl = canvas.toDataURL("image/jpeg", 0.90);
       
       if (activeCamera === "selfie") {
         setSelfieImg(imageUrl);
