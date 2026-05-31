@@ -4,6 +4,11 @@ import type { NextRequest } from 'next/server';
 // NAMA FUNGSI DIUBAH MENJADI "proxy" SESUAI KONVENSI BARU
 export function proxy(request: NextRequest) {
   // 1. Ambil token dari Cookies
+
+  // //hapus kalau mau production
+  // return NextResponse.next();
+  // //atas
+  
   const token = request.cookies.get('access_token')?.value;
   
   // 2. Cek apakah user sedang mencoba mengakses halaman login atau register
