@@ -161,7 +161,7 @@ const Navbar = ({
   isLoading: boolean;
 }) => (
   <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
-    <div className="max-w-4xl mx-auto flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4">
+    <div className="max-w-5xl mx-auto flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center gap-3">
         <Image 
           src="/gerai.png" 
@@ -231,8 +231,8 @@ export default function Home() {
     saldoTersedia: 0,
     totalDihasilkan: 0,
     iuranPokok: 1000000, 
-    namaBank: "",        // State baru untuk nama bank
-    noRekening: "",      // State baru untuk nomor rekening
+    namaBank: "",        
+    noRekening: "",      
     referredUsers: [] as any[],
     withdrawalHistory: [] as any[]
   });
@@ -264,8 +264,8 @@ export default function Home() {
               saldoTersedia: data.current_balance || 0,
               totalDihasilkan: data.total_earned_reward || 0,
               iuranPokok: 1000000, 
-              namaBank: data.bank_name || "",         // Mengambil bank_name dari API
-              noRekening: data.account_number || "",   // Mengambil account_number dari API
+              namaBank: data.bank_name || "",         
+              noRekening: data.account_number || "",   
               referredUsers: data.referred_users_list || [],
               withdrawalHistory: data.withdrawal_history_list || []
           });
@@ -293,7 +293,6 @@ export default function Home() {
       });
       return;
     }
-    // Buka modal konfirmasi jika saldo mencukupi
     setIsConfirmModalOpen(true);
   };
 
@@ -304,7 +303,7 @@ export default function Home() {
       const response = await fetchWithAuth("wallet/v1/withdraw", { method: "POST" });
       const resData = await response.json();
 
-      setIsConfirmModalOpen(false); // Tutup modal konfirmasi
+      setIsConfirmModalOpen(false); 
 
       if (response.ok) {
         setNotification({
@@ -314,7 +313,6 @@ export default function Home() {
           type: "success"
         });
         
-        // Reset ke halaman 1 agar log transaksi terbaru di atas langsung terlihat
         setWithdrawalPage(1);
         await fetchDashboardData();
       } else {
@@ -418,7 +416,7 @@ export default function Home() {
       />
 
       <div className="bg-linear-to-br from-blue-700 to-blue-950 px-4 sm:px-6 pt-12 pb-32">
-        <div className="max-w-4xl mx-auto text-center sm:text-left">
+        <div className="max-w-5xl mx-auto text-center sm:text-left">
           <h2 className="text-white text-3xl sm:text-4xl font-black tracking-tight">Kemitraan <span className="text-yellow-400">GERAI</span></h2>
           <p className="text-blue-100 text-sm sm:text-base mt-3 font-medium leading-relaxed max-w-xl">
             Ajak teman dan kolega bergabung. Dapatkan bonus langsung untuk setiap pendaftaran yang berhasil diverifikasi.
@@ -426,7 +424,7 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 -mt-20 pb-20">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 -mt-20 pb-20">
         <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-200">
           
           <div className="flex items-center justify-between mb-8">
@@ -448,18 +446,24 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 mb-10">
-            {/* Box Undangan */}
-            <div className="bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 flex flex-col justify-center">
-              <div className="flex justify-between items-start mb-6">
-                <p className="text-slate-500 font-bold text-xs sm:text-sm tracking-widest uppercase">Anggota Terundang</p>
-                <span className="bg-white text-blue-600 p-2 rounded-lg border border-slate-200 shadow-sm">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                </span>
+          {/* PERUBAHAN GRID: grid-cols-1 md:grid-cols-2 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 mb-10">
+            
+            {/* Box Undangan (Full Width di Desktop -> md:col-span-2) */}
+            <div className="md:col-span-2 bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div>
+                <div className="flex items-center gap-3 mb-2 md:mb-4">
+                  <span className="bg-white text-blue-600 p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                  </span>
+                  <p className="text-slate-500 font-bold text-sm tracking-widest uppercase">Anggota Terundang</p>
+                </div>
+                <p className="text-slate-500 text-sm hidden md:block font-medium">Terus bagikan tautan referensi Anda untuk menambah penghasilan.</p>
               </div>
-              <div className="flex items-end gap-2 mt-auto">
-                <p className="text-5xl sm:text-6xl font-black text-slate-800 tracking-tighter">{user.jumlahReferral}</p>
-                <p className="text-slate-500 font-bold text-base mb-1.5">Orang</p>
+              
+              <div className="flex items-end gap-2 mt-auto md:mt-0">
+                <p className="text-5xl md:text-7xl font-black text-slate-800 tracking-tighter">{user.jumlahReferral}</p>
+                <p className="text-slate-500 font-bold text-base md:text-xl mb-1.5 md:mb-2.5">Orang</p>
               </div>
             </div>
 
