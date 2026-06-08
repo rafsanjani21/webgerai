@@ -437,7 +437,9 @@ export default function Home() {
                 )}
               </div>
               
-              <h2 className="text-[#FFC516] font-bold text-xl">{user.nama}</h2>
+              <h2 className="text-[#FFC516] font-bold text-[17px] truncate">
+  {user.nama.split(' ')[0]}
+</h2>
             </div>
             <img src="/gerai_biru.png" alt="Logo" className="w-36 h-auto absolute top-0 right-0" />
           </div>
@@ -447,7 +449,7 @@ export default function Home() {
             <p className="text-white/80 text-xs font-medium tracking-wide">Saldo Aktif (Tersedia)</p>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-sm font-bold text-[#FFC516]">Rp</span>
-              <span className="text-3xl font-black text-[#FFC516]">{showBalance ? user.saldoTersedia.toLocaleString("id-ID") : "•••••••"}</span>
+              <span className="text-2xl font-black text-[#FFC516]">{showBalance ? user.saldoTersedia.toLocaleString("id-ID") : "•••••••"}</span>
               <button onClick={() => setShowBalance(!showBalance)} className="text-[#FFC516] ml-1 opacity-80 hover:opacity-100">
                 {showBalance ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -457,25 +459,34 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="flex justify-center gap-4.5 mt-3 bg-black/10 p-2.5 rounded-xl border border-white/10 backdrop-blur-sm">
-              <div className="cursor-pointer group" onClick={() => setNotification({ isOpen: true, title: "Informasi Iuran Pokok", message: "Iuran pokok tidak bisa ditarik. Saldo ini hanya bisa dicairkan apabila Anda keluar dari keanggotaan.", type: "error" })}>
-                <div className="flex items-center gap-1 mb-0.5">
-                  <p className="text-[10px] text-white/70 uppercase font-bold tracking-wider group-hover:text-white transition-colors">Iuran Pokok</p>
-                  <svg className="w-2.5 h-2.5 text-white/70 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
-                </div>
-                <p className="text-white font-bold text-sm">{showBalance ? formatRupiah(user.iuranPokok) : "Rp •••••••"}</p>
-              </div>
-              <div className="w-px bg-white/20"></div>
-              <div>
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wider">Total Hasil</p>
-                <p className="text-white font-bold text-sm">{showBalance ? formatRupiah(user.totalDihasilkan) : "Rp •••••••"}</p>
-              </div>
-              <div className="w-px bg-white/20"></div>
-              <div>
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wider">Nomor Referral</p>
-                <p className="text-white font-bold text-sm">{showBalance ? user.noWhatsapp : "•••••••"}</p>
-              </div>
-            </div>
+            {/* Container Saldo Tambahan yang Responsive */}
+<div className="flex justify-between items-center mt-4 bg-black/10 p-3 rounded-xl border border-white/10 backdrop-blur-sm gap-2">
+  
+  {/* Iuran Pokok */}
+  <div className="cursor-pointer group flex-1 text-center" onClick={() => setNotification({ isOpen: true, title: "Informasi Iuran Pokok", message: "Iuran pokok hanya bisa ditarik jika Anda keluar dari Anggota.", type: "error" })}>
+    <div className="flex items-center justify-center gap-1 mb-0.5">
+      <p className="text-[9px] text-white/70 uppercase font-bold tracking-wider">Iuran Pokok</p>
+      <svg className="w-2 h-2 text-white/70" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+    </div>
+    <p className="text-white font-bold text-xs truncate">{showBalance ? formatRupiah(user.iuranPokok).replace("Rp ", "") : "••••"}</p>
+  </div>
+
+  <div className="w-px h-8 bg-white/20"></div>
+
+  {/* Total Hasil */}
+  <div className="flex-1 text-center">
+    <p className="text-[9px] text-white/70 uppercase font-bold tracking-wider mb-0.5">Total Hasil</p>
+    <p className="text-white font-bold text-xs truncate">{showBalance ? formatRupiah(user.totalDihasilkan).replace("Rp ", "") : "••••"}</p>
+  </div>
+
+  <div className="w-px h-8 bg-white/20"></div>
+
+  {/* No Referral */}
+  <div className="flex-1 text-center">
+    <p className="text-[9px] text-white/70 uppercase font-bold tracking-wider mb-0.5">No.Referral</p>
+    <p className="text-white font-bold text-xs truncate">{showBalance ? user.noWhatsapp : "••••"}</p>
+  </div>
+</div>
           </div>
 
           {/* Quick Actions */}
