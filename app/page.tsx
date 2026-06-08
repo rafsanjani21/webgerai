@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { auth } from "./lib/firebase";
 import { fetchWithAuth } from "./lib/apiClient";
 
@@ -398,7 +397,7 @@ export default function Home() {
 
   const [user, setUser] = useState({
     nama: "",
-    photoSelfieUrl: "", // === STATE BARU UNTUK FOTO ===
+    photoSelfieUrl: "",
     jumlahReferral: 0,
     noWhatsapp: "",
     saldoTersedia: 0,
