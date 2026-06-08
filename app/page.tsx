@@ -332,12 +332,50 @@ const LogoutModal = ({
   );
 };
 
+// ================= KOMPONEN MODAL FOTO PROFIL =================
+const ProfilePhotoModal = ({
+  isOpen,
+  photoUrl,
+  onClose,
+}: {
+  isOpen: boolean;
+  photoUrl: string;
+  onClose: () => void;
+}) => {
+  if (!isOpen || !photoUrl) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose} // Tutup modal jika area luar diklik
+    >
+      <div 
+        className="relative w-full max-w-sm flex flex-col items-center justify-center" 
+        onClick={(e) => e.stopPropagation()} // Mencegah modal tertutup jika foto diklik
+      >
+        <button
+          onClick={onClose}
+          className="absolute -top-12 right-0 text-white hover:text-slate-300 font-bold text-lg w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+        >
+          ✕
+        </button>
+        <img
+          src={photoUrl}
+          alt="Foto Profil Full"
+          className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
+        />
+      </div>
+    </div>
+  );
+};
+
 // ================= KOMPONEN UTAMA =================
 export default function Home() {
   const router = useRouter();
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   // States Modal
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
@@ -595,12 +633,23 @@ export default function Home() {
           onCancel={() => setIsLogoutModalOpen(false)}
         />
 
+        <ProfilePhotoModal
+          isOpen={isPhotoModalOpen}
+          photoUrl={user.photoSelfieUrl}
+          onClose={() => setIsPhotoModalOpen(false)}
+        />
+
         {/* HEADER AREA */}
         <div className="bg-[#4461AD] pt-10 pb-[100px] px-6 rounded-b-xl relative">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-3">
               {/* === AREA AVATAR PROFILE === */}
-              <div className="w-14 h-14 bg-yellow-100 rounded-full overflow-hidden flex items-center justify-center border-2 border-white/20">
+              <div 
+                className={`w-14 h-14 bg-yellow-100 rounded-full overflow-hidden flex items-center justify-center border-2 border-white/20 ${user.photoSelfieUrl ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
+                onClick={() => {
+                  if (user.photoSelfieUrl) setIsPhotoModalOpen(true);
+                }}
+              >
                 {user.photoSelfieUrl ? (
                   <img
                     src={user.photoSelfieUrl}
