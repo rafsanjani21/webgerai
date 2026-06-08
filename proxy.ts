@@ -5,9 +5,9 @@ import type { NextRequest } from 'next/server';
 export function proxy(request: NextRequest) {
   // 1. Ambil token dari Cookies
 
-  //hapus kalau mau production
-  return NextResponse.next();
-  //atas
+  // //hapus kalau mau production
+  // return NextResponse.next();
+  // //atas
   
   const token = request.cookies.get('access_token')?.value;
   
