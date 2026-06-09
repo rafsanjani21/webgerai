@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "./lib/firebase";
 import { fetchWithAuth } from "./lib/apiClient";
+import MemberCardModal from "./components/MemberCardModal";
 
 // ================= FUNGSI UTILITY =================
 const formatRupiah = (angka: number) => {
@@ -380,6 +381,7 @@ export default function Home() {
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isMemberCardOpen, setIsMemberCardOpen] = useState(false);
 
   // States UI
   const [showBalance, setShowBalance] = useState(true);
@@ -638,6 +640,8 @@ export default function Home() {
           onClose={() => setIsPhotoModalOpen(false)}
         />
 
+        <MemberCardModal isOpen={isMemberCardOpen} onClose={() => setIsMemberCardOpen(false)} />
+
         {/* HEADER AREA */}
         <div className="bg-[#4461AD] pt-10 pb-[100px] px-6 rounded-b-xl relative">
           <div className="flex justify-between items-start">
@@ -849,29 +853,16 @@ export default function Home() {
                 Salin Referral
               </span>
             </div>
-            <div
-              className="flex flex-col items-center gap-1.5 cursor-pointer"
-              onClick={() => setActiveTab("referral")}
-            >
+            
+            <div className="flex flex-col items-center gap-1.5 cursor-pointer" onClick={() => setIsMemberCardOpen(true)}>
               <div className="w-12 h-12 border-2 border-[#FFC516] rounded-xl flex items-center justify-center text-[#FFC516] hover:bg-white/10 transition-colors">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                 </svg>
               </div>
-              <span className="text-[10px] text-[#FFC516] text-center font-medium">
-                Undangan
-              </span>
+              <span className="text-[10px] text-[#FFC516] text-center font-medium">Kartu Member</span>
             </div>
+
             <div
               className="flex flex-col items-center gap-1.5 cursor-pointer"
               onClick={handleRequestLogout}
@@ -1036,5 +1027,5 @@ export default function Home() {
         </div>
       </div>
     </div>
-  );
+  );  
 }
