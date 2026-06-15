@@ -679,7 +679,7 @@ export default function Home() {
               </h2>
             </div>
             <img
-              src="/gerai_biru.png"
+              src="/gerai.png"
               alt="Logo"
               className="w-36 h-auto absolute top-0 right-0"
             />
